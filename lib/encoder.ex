@@ -78,10 +78,11 @@ defimpl Jason.Encoder, for: Any do
   defmacro __deriving__(module, struct, opts) do
     fields = fields_to_encode(struct, opts)
     kv = Enum.map(fields, &{&1, generated_var(&1, __MODULE__)})
+    kv2 = kv ++ [{:struct, resource_name(module)}]
     escape = quote(do: escape)
     encode_map = quote(do: encode_map)
     encode_args = [escape, encode_map]
-    kv_iodata = Jason.Codegen.build_kv_iodata(kv, encode_args)
+    kv_iodata = Jason.Codegen.build_kv_iodata(kv2, encode_args)
 
     quote do
       defimpl Jason.Encoder, for: unquote(module) do
@@ -92,6 +93,14 @@ defimpl Jason.Encoder, for: Any do
         end
       end
     end
+  end
+
+  defp resource_name(alias) do
+    alias
+    |> to_string()
+    |> Module.split()
+    |> List.last()
+    |> Macro.underscore()
   end
 
   # The same as Macro.var/2 except it sets generated: true

@@ -142,7 +142,7 @@ defmodule Jason.EncoderTest do
   test "@derive" do
     derived = %Derived{name: "derived"}
     assert Encoder.impl_for!(derived) == Encoder.Jason.EncoderTest.Derived
-    assert Jason.decode!(to_json(derived)) == %{"name" => "derived"}
+    assert Jason.decode!(to_json(derived)) == %{"name" => "derived", "struct" => "derived"}
 
     non_derived = %NonDerived{name: "non-derived"}
     assert_raise Protocol.UndefinedError, fn ->
@@ -150,10 +150,11 @@ defmodule Jason.EncoderTest do
     end
 
     derived_using_only = %DerivedUsingOnly{name: "derived using :only", size: 10}
-    assert to_json(derived_using_only) == ~s({"name":"derived using :only"})
+    to_json(derived_using_only)
+    assert to_json(derived_using_only) == ~s({"name":"derived using :only","struct":"derived_using_only"})
 
     derived_using_except = %DerivedUsingExcept{name: "derived using :except", size: 10}
-    assert to_json(derived_using_except) == ~s({"size":10})
+    assert to_json(derived_using_except) == ~s({"size":10,"struct":"derived_using_except"})
   end
 
   test "@derive validate `except:`" do
